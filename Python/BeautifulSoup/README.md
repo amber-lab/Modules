@@ -21,7 +21,7 @@ get()
 get_attribute_list()
 
 
-### Navigating
+### Basic Navigation
 BeautifulSoup transforms a complex HTML document into a complex tree of Python objects.
 
 ```python
@@ -197,8 +197,61 @@ type(unicode_string)
 
 Its not recomended to edit the string attribute because it will replace it with a string class.
 Strings don't support the .contents or .string attributes, or the find() method.
+To replace one string with another use replace_with();
+
+### BeautifulSoup
+
+The BeautifulSoup object represents the parsed document as a whole, it can be treated as Tag object with some restrictions.
 
 
+```python
+doc = BeautifulSoup("<document><content/>INSERT FOOTER HERE</document", "html.parser")
+footer = BeautifulSoup("<footer>Here's the footer</footer>", "html.parser")
+doc.find(text="INSERT FOOTER HERE").replace_with(footer)
+# 'INSERT FOOTER HERE'
+print(doc)
+# <document><content/><footer>Here's the footer</footer></document>
+```
+
+This object do not correspond to an actual HTML or XML tag. It has no name and no attributes.
+Only has .name attribute.
+
+### Navigating
+
+A Tag object is composed by Tags and NavigatableStrings. A children Tag can be acessed with the attribute name of the tag.
+The .contents method returns a list of Tags and NavigableStrings inside the object that called the function.
+The .children method returns a iteratable list of Tags and NavigableStrings
+The .descendants method is a recursive iteratable of Tags and NavigableStrings
+
+```python
+soup = BeautifulSoup('<html><head><title>Just a Test</title></head><body><p>Example</p><p>Another example</p></body></html>', 'html.parser')
+body = soup.body
+
+body
+# <body><p>Example</p><p>Another example</p></body>
+
+body.contents
+# [<p>Example</p>, <p>Another example</p>]
+
+for child in soup.body.children:
+	print(child)
+	print(child.__class__)
+
+# <p>Example</p>
+# <class 'bs4.element.Tag'>
+
+# <p>Another example</p>
+# <class 'bs4.element.Tag'>
 
 
+len(list(body.contents))
+# 2
+len(list(body.descendants))
+# 4
+```
 
+If there's more than a string insede of a Tag element, its possible to only ask fro the strings.
+
+```python
+for string in body.strings
+```
