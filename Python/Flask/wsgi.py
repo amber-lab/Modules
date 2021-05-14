@@ -15,8 +15,12 @@ def getStatic():
 	return url_for('static', filename='style.css')
 
 @app.route('/hello/')
-@app.route('/hello/<string:name>')
-def hello(name=None):
+@app.route('/hello/<string:name>&<tst>')
+def hello(name=None, tst=None):
+
+	if tst:
+		return 'YOOO'
+
 	return render_template('hello.html', name=name)
 
 @app.route('/login', methods=['POST', 'GET'])
@@ -56,3 +60,7 @@ def setcookie(usr=None):
 		return resp
 	else:
 		return "No cookie to define or already defined"
+
+
+if __name__ == '__main__':
+    app.run()

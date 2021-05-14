@@ -1,0 +1,171 @@
+# Elastic Stack
+
+## Componentes
+
+### ELK Stack
+E - ElasticSearch
+	- Motor de procura e análise
+L - LogStash
+	- Processador de dados através de pipelines que consegue recever, transformar e enviar dados simultaneamente, incluindo ao elasticsearch
+K - Kibana
+	- Visualizador gráfico de dados de elasticsearch.
+
+#### ElastickSearch
+- Banco de dados Orientado a Documentos
+	- Tudo aquilo que é indexado é tranformado em documentos.
+- Base de Dados NoSQL
+- Motor de Busca
+- Análise de Dados
+- Escalável
+- Conta com API Rest
+
+#### Logstash
+- Manipulação de Logs
+- Coletor de dados em tempo real
+- Recebe e envia dados de múltiplas fontes
+- Conta com vários plugins que facilitam a filtragem.
+
+#### Kibana
+- Ferramenta de visualização e exploração de dados
+- Usada com logs, análise de séries, Monitoramento de aplicações e inteligência operacional
+- Integrado com ElasticSearch
+- Agregadores e filtragem de dados
+- Dashboards
+- Gráficos interativos
+- Mapas
+
+## Diferença entre ELK Stack e Elastic Stack
+
+A maior diferença entre estes componentes é o Beats, este agente é identica ao Logstash mas é executada a cada click.
+	- lightweight data shipper
+	- Agente Coletor de dados
+	- Existem diversos tipos de Beats:
+		- Auditbeat
+		- Metricbeat
+		- Filebeat
+		- Packetbeat
+		- Heartbeat
+		- Winlogbeat
+	- Facil integração com Elasticsearch ou Logstash
+	- Possível construir um Beat
+
+### Elastic Stack
+![Elastic Stack](elasticsearch.jpg "Elastic Stack")
+
+
+# Elastic Search
+
+## Instalação como serviço via apt
+
+```sh
+# Adicionar chave de registo
+wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
+
+# Dependencias
+sudo apt-get install apt-transport-https
+
+# Definições de repositório
+echo "deb https://artifacts.elastic.co/packages/7.x/apt stable main" | sudo tee /etc/apt/sources.list.d/elastic-7.x.list
+
+# Instalação
+
+sudo apt-get update && sudo apt-get install elasticsearch
+```
+
+## Configuração
+
+### Localização de ficheiro de configuração
+Os ficheiro de configuração estão em na diretoria /etc/elasticsearch quando instalados via apt. É possivel usar API de configuração de cluster.
+Lista de ficheiro de configuração
+- elasticsearch.yml
+	- configuração de Elastisearch
+- jvm.option
+	- configuração de Java Runtime Enviroment
+- log4j2.properties
+	- configuração de login Elasticsearch
+No caso de alterar a localização padrão dos ficheiros de configuração exportar ES_PATH_CONF com a localização do ficheiro.
+
+### Formato da configuração
+
+```yaml
+path:
+	data: /var/lib/elasticsearch
+	logs: /var/log/elasticsearch
+# OU
+path.data: /var/lib/elasticsearch
+path.logs: /var/log/elasticsearch
+
+# usando lista de valores
+
+discovery.seed_hosts:
+	- 192.168.1.10:9300
+	- 192.168.1.11
+	- seeds.mydomain.com
+# OU
+
+discovery.seed_hosts: [192.168.1.10:9300, 192.168.1.11, seeds.mydomain.com]
+
+# usando variaveis exportadas
+export HOSTNAME="host1,host2"
+
+node.name: ${HOSTNAME}
+network.host: ${ES_NETWORK_HOST}
+
+
+```
+
+### Configurações importantes
+
+#### PATH
+Elasticsearch escreve os dados na diretoria 'data' e os logs na diretoria 'logs'.
+Em ambiente de produção é recomendado atribuir 'path.data' e 'path.logs' fora de $ES_HOME
+É possivel atribuir vários caminhos em path.data, 
+
+#### Cluster
+Um nó so se pode juntar a um cluster quando partilharem o mesmo c'luster.name', o nome predefenido é elasticsearch mas deve ser alterado para um nome que descreva o serviço.
+
+```yaml
+cluster.name: logging-prod
+```
+
+#### Node
+Elasticsearch usa 'node.name' como um indentificador que possa ser lido por humanos. Este nome é incluido nas respostas da API e por padrão é o nome de hospedagem da máquina, este pode ser alterado.
+
+```yaml
+node.name: prod-data-2
+```
+
+#### Network
+Por predefinição elasticsearch atua no loopback da máquina, para alterar este comportamento deve ser alterado 'network.host'
+```yaml
+network.host
+```
+#### Discovery e definições de formação de cluster
+Por predefinição elasticsearch está ligado ao loopback da máquina para analisar as portas locais de 9300 a 9305 para se conectar com outros nodes no mesmo servidor. Quando se quer formar um cluster com nodes em outros hosts é necessário configurar 'discovery.seed_hosts'.
+
+```yaml
+discovery.seed_hosts:
+	- 192.168.1.10:9300
+	- 192.168.1.11  *
+	- seeds.mydomain.com **
+```
+* o numero da porta é opcional pois irá usar o padrão 9300.
+** se o hostname for resolvido em multiplos IP's, o node vai tentar descobrir outros nodes em todos os endereços.
+
+Quando o Elasticsearch é iniciado pela primeira vez, um processo de cluster bootstrapping determina o conjunto de master nodes que são incluidos. Este processo é automático em modo de desenvolvimento. Este processo é inerentemente inseguro e para isso deve-se atribuir uma lista de clusters iniciais.
+```ỳaml
+cluster.initial_master_node:
+	- master-node-a
+	- master-node-b
+	- master-node-c
+```
+Os nodes devem ser identificados por 'node.name' que são predefenidos pelo seu hostname. No caso de ser um nome de dominio completamente qualificado(FQDN) como 'master-node-a.example.com' deve ser escrito na lista de 'cluster.initial_master_node'
+
+
+
+# Termos
+
+JVM heap size - diretamente realcionado com a memória fisica do sistema
+nodes - servidores
+cluster - conjunto de servidores
+shards - parte de documentos
