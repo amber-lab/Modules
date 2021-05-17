@@ -15,7 +15,7 @@ curl -X GET "localhost:9200/_alias"
 ```
 ##### Apagar index
 ```sh
-curl -X GET "localhost:9200/nome-do-indice"
+curl -X DELETE "localhost:9200/nome-do-indice"
 ```
 
 ##### Criar Documento
