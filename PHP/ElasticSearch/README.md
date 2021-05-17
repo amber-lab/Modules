@@ -4,19 +4,27 @@
 
 ### ELK Stack
 E - ElasticSearch
-	- Motor de procura e análise
+	- Motor de procura e análise de texto e fonética por relevância
 L - LogStash
 	- Processador de dados através de pipelines que consegue recever, transformar e enviar dados simultaneamente, incluindo ao elasticsearch
 K - Kibana
 	- Visualizador gráfico de dados de elasticsearch.
 
 #### ElastickSearch
-- Banco de dados Orientado a Documentos
-	- Tudo aquilo que é indexado é tranformado em documentos.
-- Base de Dados NoSQL
+
 - Motor de Busca
 - Análise de Dados
-- Escalável
+- Banco de dados Orientado a Documentos
+	- Tudo aquilo que é indexado é tranformado em documentos.
+- Padão NoSQL
+- Distribuido
+	- pode haver vários nós
+	- dados são procurados paralelamente
+- Escalavel
+	- Escalável a partir de nós
+- Versão open source
+- Schema Free
+	- Não necessita de declarar tipo de dados para certos campos embora seja recomendado
 - Conta com API Rest
 
 #### Logstash
@@ -134,6 +142,15 @@ Elasticsearch usa 'node.name' como um indentificador que possa ser lido por huma
 ```yaml
 node.name: prod-data-2
 ```
+###### Recomendações
+	- Metade da memória RAM do servidor deve ser atribuida ao heap da JVM
+	- Não deve ultrapassar 32GB de heap
+	- Configuração minima e máxima de heap iguais, Xms igual a Xmx
+
+###### Master Nodes
+Nodes com atributo master podem ter estado eleito ou elegível, o node master eleito será aquele que retorna os dados e escrever
+
+#############################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################:D###################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################
 
 #### Network
 Por predefinição elasticsearch atua no loopback da máquina, para alterar este comportamento deve ser alterado 'network.host'
@@ -153,7 +170,7 @@ discovery.seed_hosts:
 ** se o hostname for resolvido em multiplos IP's, o node vai tentar descobrir outros nodes em todos os endereços.
 
 Quando o Elasticsearch é iniciado pela primeira vez, um processo de cluster bootstrapping determina o conjunto de master nodes que são incluidos. Este processo é automático em modo de desenvolvimento. Este processo é inerentemente inseguro e para isso deve-se atribuir uma lista de clusters iniciais.
-```ỳaml
+```yaml
 cluster.initial_master_node:
 	- master-node-a
 	- master-node-b
@@ -161,11 +178,54 @@ cluster.initial_master_node:
 ```
 Os nodes devem ser identificados por 'node.name' que são predefenidos pelo seu hostname. No caso de ser um nome de dominio completamente qualificado(FQDN) como 'master-node-a.example.com' deve ser escrito na lista de 'cluster.initial_master_node'
 
+#### Shards
+Um indice pode contar com várias shards em diferentes nodes. Estas shards podem ser replicadas em uma shard em outro node.
+
+##### Exemplos:
+
+###### Indice, shard e datanode
+![Elastic Stack](shars_replicas.png "Replicas")
+
+```json
+PUT dev-indice{
+	"settings" : {
+		"number_of_shards" : 2,
+		"number_of_replicas" : 1
+	}
+}
+```
+
+#### Roles
 
 
 # Termos
 
-JVM heap size - diretamente realcionado com a memória fisica do sistema
-nodes - servidores
-cluster - conjunto de servidores
-shards - parte de documentos
+- JVM heap size
+	- Memória onde são guardados os dados de entrada antes de seres pedidos por um programa
+	- diretamente relacionado com a memória fisica do sistema
+
+- nodes
+	- Instância servidora de elasticsearch
+	- Apenas uma instância de elasticsearch por servidor
+
+- cluster
+	- conjunto de nodes com mesmo cluster.name
+	- os nodes dentro de um cluster possuem diferentes funções
+		- Master
+			- Responsável pelas configurações e alterações de um cluster
+		- Data
+			- Responsável pelas operações a dados.
+		- Ingest
+			- Responsavel pelos pré-processamentos de dados
+
+- index
+	- Namespace que aponta para um ou mais shards
+
+- shards
+	- Instância única do lucene
+	- Cada shard é um motor de busca completo de si mesmo
+	- finito
+	- os shards não são diretamente acessados pelo cliente, apenas pelo seu indice
+
+- Apach lucene
+	- Bíblioteca de software de mecanismo de pesquisa
