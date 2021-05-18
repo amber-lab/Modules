@@ -1,4 +1,5 @@
 <?php
+
 require '../vendor/autoload.php';
 $hosts = [
     'localhost:9200' 
@@ -7,18 +8,13 @@ $hosts = [
 $client = Elasticsearch\ClientBuilder::create()
                     ->setHosts($hosts)
                     ->build();
+
 $params = [
-    'index' => 'test',
-    'body'  => [
-        'query' => [
-            'match' => [
-                'job' => 'Dev'
-            ]
-        ]
-    ]
+	'index' => 'test',
+	'id' => '10',
 ];
 
-$results = $client->info();
-var_dump($results)
+$result = $client->delete($params);
+var_dump($result);
 
 ?>

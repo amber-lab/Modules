@@ -7,18 +7,18 @@ $hosts = [
 $client = Elasticsearch\ClientBuilder::create()
                     ->setHosts($hosts)
                     ->build();
+
 $params = [
-    'index' => 'test',
-    'body'  => [
-        'query' => [
-            'match' => [
-                'job' => 'Dev'
-            ]
-        ]
-    ]
+	'index' => 'test',
+	'id' => '4'	
 ];
 
-$results = $client->info();
-var_dump($results)
+try{
+	$result = $client->get($params);
+	var_dump($result);
+}catch(Missing404Exception $e) {
+	echo "Document not found: %s\n", $e->getMessage();
+}
+
 
 ?>

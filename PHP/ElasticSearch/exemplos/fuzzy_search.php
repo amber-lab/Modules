@@ -7,13 +7,19 @@ $hosts = [
 $client = Elasticsearch\ClientBuilder::create()
                     ->setHosts($hosts)
                     ->build();
+
 $params = [
-	'index' => 'test',
-	'id' => '10',
-	'body' => ['testFielf' => 'abc']];
+	'index' => 'my_index',
+	'body' =>[
+		'query' => [
+			'fuzzy' => [
+				'name' => [
+					'value' => 'harry'
+				]
+			]
+		]
+	]
+]
 
-$result = $client->index($params);
-var_dump($result);
-
-
+$result = $client->search($params);
 ?>
