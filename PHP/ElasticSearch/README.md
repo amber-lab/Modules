@@ -245,3 +245,18 @@ PUT dev-indice{
 
 - Apach lucene
 	- Bíblioteca de software de mecanismo de pesquisa
+
+
+# Funcionalidades
+
+### Mapping
+Mapping permite aplicar um esquema nas chaves dos dados, a especificação é automatica. É necessário especificar o tipo text para poder aplicar analysers.
+
+### Analyzers
+Analyzer é um mecanismo de analise de dados durante a procura. A função dele é filtrar os caracteres, separa os dados em termos(Tokenizer), e filtrar cada um dos termos. Existem diversos tipos de Analyzers padrão e também é possível configurar um analyzer.
+
+### Queries
+Normalmente usado para procura de dados idênticos. Tem peso no score.
+
+### Filters
+Normalmente usado para procura de dados exatamente iguais a um termo. Não tem peso no score
